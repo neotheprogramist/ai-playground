@@ -3,11 +3,11 @@ import numpy as np
 from gymnasium import spaces
 
 class CustomEnv(gym.Env):
-    def __init__(self, data, action_spece=3, observation_space=8, balance=10000):
+    def __init__(self, data, action_spece=3, observation_space=8, initial_balance=10000):
         super(CustomEnv, self).__init__()
-        self.data = data.reset_index()
-        data['Action'] = 1
-        self.actions_data = data.reset_index()
+        self.data = data.reset_index().copy()
+        self.data['Action'] = 1
+        self.actions_data = self.data.copy()
 
         self.action_space = spaces.Discrete(action_spece)
         self.observation_space = spaces.Box(low=0, high=np.inf, shape=(observation_space,), dtype=np.float32)
@@ -17,7 +17,8 @@ class CustomEnv(gym.Env):
 
         self._pct_of_balance = 0.1
 
-        self._balance = balance
+        self._initial_balance = initial_balance
+        self._balance = initial_balance
         self._token_amount = 0
         self._balance_before_sell = 0
         self._last_action = None
@@ -27,7 +28,7 @@ class CustomEnv(gym.Env):
         self._current_step = 0
         self._total_reward = 0.0
 
-        self._balance = 10000
+        self._balance = self._initial_balance
         self._token_amount = 0
         self._balance_before_sell = 0
         self._last_action = None
@@ -40,6 +41,8 @@ class CustomEnv(gym.Env):
 
     def step(self, action):
         current_price = self.data.iloc[self._current_step]['Close']
+        if current_price <= 0:
+            raise ValueError("Invalid current price encountered in data.")
         reward = 0
 
         self.actions_data.loc[self._current_step, 'Action'] = 1
@@ -84,5 +87,5 @@ class CustomEnv(gym.Env):
         return dict(
             total_reward=self._total_reward,
             balance=self._balance,
-            portolio_value = self._balance + self._token_amount * self.data.iloc[self._current_step]['Close']
+            portfolio_value=self._balance + self._token_amount * self.data.iloc[self._current_step]['Close']
         )
