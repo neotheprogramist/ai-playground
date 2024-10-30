@@ -3,13 +3,13 @@ import numpy as np
 from gymnasium import spaces
 
 class CustomEnv(gym.Env):
-    def __init__(self, data, action_spece=3, observation_space=8, initial_balance=10000):
+    def __init__(self, data, action_space=3, observation_space=8, initial_balance=10000):
         super(CustomEnv, self).__init__()
         self.data = data.reset_index().copy()
         self.data['Action'] = 1
         self.actions_data = self.data.copy()
 
-        self.action_space = spaces.Discrete(action_spece)
+        self.action_space = spaces.Discrete(action_space)
         self.observation_space = spaces.Box(low=0, high=np.inf, shape=(observation_space,), dtype=np.float32)
 
         self._current_step = 0
