@@ -5,6 +5,41 @@ import pandas as pd
 from gymnasium import spaces
 
 class CustomBuySellEnv(gym.Env):
+    """
+    CustomBuySellEnv is a custom OpenAI Gym environment for simulating a buy/sell trading strategy.
+
+    Attributes:
+        data (pd.DataFrame): The dataset containing historical price data.
+        initial_budget (float): The initial budget for trading.
+        budget_threshold (float): The threshold of the budget below which no further investments are made.
+        investment_fraction (float): The fraction of the remaining budget to invest in each trade.
+        tx_fee (float): The transaction fee for each trade.
+        actions_data (pd.DataFrame): DataFrame to store actions taken at each step.
+        budget_remaining (float): The remaining budget after investments.
+        budget (float): The current budget including investments.
+        invested (float): The amount currently invested.
+        previous_action (int): The previous action taken (0 = HOLD, 1 = BUY, -1 = SELL).
+        capital_history (list): List to store the history of the budget.
+        action_space (gym.spaces.Discrete): The action space for the environment (Hold, Buy, Sell).
+        observation_space (gym.spaces.Box): The observation space for the environment.
+        done_idx (int): The index at which the environment is considered done.
+        current_step (int): The current step in the environment.
+        current_price (float): The current price of the asset.
+        current_state (np.ndarray): The current state observation.
+        next_return (float): The return for the next day.
+        current_reward (float): The reward for the current step.
+        done (bool): Flag indicating if the environment is done.
+
+    Methods:
+        check_done(): Checks if the environment is done.
+        _calculate_reward(action): Calculates the reward for a given action.
+        _calculate_reward2(action): Alternative reward calculation method.
+        _get_observation(): Gets the current state observation.
+        close(): Closes the environment and returns the actions data.
+        _next_day_return(): Gets the return for the next day.
+        reset(seed=None, options=None): Resets the environment to the initial state.
+        step(action): Takes a step in the environment with the given action.
+    """
     def __init__(
         self,
         data,
@@ -43,6 +78,27 @@ class CustomBuySellEnv(gym.Env):
         return False
 
     def _calculate_reward(self, action):
+        """
+        Calculate the reward based on the given action.
+
+        Parameters:
+        action (int): The action taken by the agent. 
+                      1 for buy, -1 for sell, and 0 for hold.
+
+        Returns:
+        float: The calculated reward after applying the action.
+
+        The reward is calculated based on the following:
+        - If the action is buy (1) and the budget remaining is above a certain threshold, 
+          the investment is made and the budget is reduced. Otherwise, a penalty is applied.
+        - If the action is sell (-1) and there is an investment, the budget is increased 
+          by the value of the investment minus transaction fees, and the investment is reset.
+        - If the action is hold (0) and the previous action was also hold, a penalty is applied.
+        - The budget is updated based on the current price.
+        - The reward is calculated based on the next return and the action, adjusted by 
+          transaction fees and penalties.
+        - Negative rewards are amplified by a factor of 1.5.
+        """
         penalty = 0
         investment = self.budget_remaining * self.investment_fraction
 
@@ -76,7 +132,13 @@ class CustomBuySellEnv(gym.Env):
 
         return reward
 
+  
     def _calculate_reward2(self, action):
+        """
+        Not yet working as expected, needs further testing and debugging.
+        Because it is focussing on buying on the start
+        """
+          
         penalty = 0
         investment = self.budget_remaining * self.investment_fraction
 
@@ -129,6 +191,16 @@ class CustomBuySellEnv(gym.Env):
         return reward
 
     def _get_observation(self):
+        """
+        Generates the current observation of the environment.
+
+        The observation includes the current state of the data (excluding the next_day_reward),
+        scaled using the environment's scaler, and additional features representing the agent's
+        budget, remaining budget, and invested amount relative to the initial budget.
+
+        Returns:
+            np.ndarray: The current state observation as a 1D array of type float32.
+        """
         state = self.data[self.current_step][
             1:
         ]  # exclude next_day_reward from state (it's more like a target)
@@ -157,6 +229,16 @@ class CustomBuySellEnv(gym.Env):
         return self.data[self.current_step][0]
 
     def reset(self, seed=None, options=None):
+        """
+        Resets the environment to its initial state.
+
+        Args:
+            seed (int, optional): The seed for random number generation. Defaults to None.
+            options (dict, optional): Additional options for the reset. Defaults to None.
+
+        Returns:
+            tuple: A tuple containing the initial state and a dictionary with the initial portfolio value.
+        """
         self.current_step = 0
         self.previous_action = 0
         self.invested = 0
@@ -174,6 +256,20 @@ class CustomBuySellEnv(gym.Env):
         )
 
     def step(self, action):
+        """
+        Execute one time step within the environment.
+
+        Parameters:
+        action (int): The action taken by the agent.
+
+        Returns:
+        tuple: A tuple containing:
+            - current_state (object): The current state of the environment.
+            - current_reward (float): The reward received after taking the action.
+            - done (bool): Whether the episode has ended.
+            - False (bool): Placeholder for compatibility with OpenAI Gym.
+            - info (dict): Additional information, including the current portfolio value.
+        """
         self.current_price = self.data.frame.iloc[self.current_step, :]["Adj Close"]
         self.current_state = self._get_observation()
         self.next_return = self._next_day_return()
