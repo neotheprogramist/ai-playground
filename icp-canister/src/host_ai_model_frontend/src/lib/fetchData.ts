@@ -1,15 +1,11 @@
+import type { TradingData } from "./env";
+
 export enum Api {
     ALPHA_VANTAGE = 1
 }
 
-export interface CandleData {
+export interface CandleData extends TradingData {
     openTime: Date;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume: number;
-    quoteVolume: number;
 }
 
 interface AlphaVantageDaily {
@@ -63,12 +59,11 @@ export async function fetchData(
                 })
                 .map(([date, values]) => ({
                     openTime: new Date(date),
-                    open: Number(values['1. open']),
-                    high: Number(values['2. high']),
-                    low: Number(values['3. low']),
-                    close: Number(values['4. close']),
-                    volume: Number(values['5. volume']),
-                    quoteVolume: Number(values['5. volume']),
+                    Open: Number(values['1. open']),
+                    High: Number(values['2. high']),
+                    Low: Number(values['3. low']),
+                    Close: Number(values['4. close']),
+                    Volume: Number(values['5. volume']),
                 }));
 
         } catch (e) {
