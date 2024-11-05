@@ -1,10 +1,9 @@
 <script lang="ts">
-  import "../index.scss";
   import { anonymousBackend } from "$lib/canisters";
   import { fetchData, Api } from "$lib/fetchData";
   import type { Action } from "../../../declarations/host_ai_model_backend/host_ai_model_backend.did";
   import { TradingEnvironment, type TradingData } from "$lib/env";
-  import { Line } from "svelte-chartjs";
+  import Line from "../components/Line.svelte";
   import {
     Chart as ChartJS,
     CategoryScale,
@@ -26,30 +25,30 @@
     Legend
   );
 
-  let greeting = "";
-  let apiKey = "";
-  let symbol = "AAPL";
-  let startDate = "2024-01-01";
-  let endDate = "2024-01-05";
-  let isLoading = false;
-  let portfolioValues: number[] = [];
-  let actions: string[] = [];
-  let dates: string[] = [];
+  let greeting = $state("");
+  let apiKey = $state("");
+  let symbol = $state("AAPL");
+  let startDate = $state("2024-01-01");
+  let endDate = $state("2024-01-05");
+  let isLoading = $state(false);
+  let portfolioValues: number[] = $state([]);
+  let actions: string[] = $state([]);
+  let dates: string[] = $state([]);
 
   // Chart data
-  $: chartData = {
+  let chartData = $derived({
     labels: dates,
     datasets: [
       {
-        label: "Portfolio Value",
+        label: "Portfolio Value", 
         data: portfolioValues,
         borderColor: "rgb(75, 192, 192)",
         tension: 0.1,
       },
     ],
-  };
+  });
 
-  $: chartOptions = {
+  let chartOptions = $derived({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -75,7 +74,7 @@
         },
       },
     },
-  };
+  });
 
   function actionToNumber(action: Action): number {
     if ("Buy" in action) return 0;
@@ -176,7 +175,7 @@
     <div class="config-column">
       <form
         action="#"
-        on:submit|preventDefault={onSubmit}
+        onsubmit={onSubmit}
         class="form-container"
       >
         <div class="form-group">

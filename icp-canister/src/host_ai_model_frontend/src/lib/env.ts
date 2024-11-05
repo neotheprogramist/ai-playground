@@ -35,7 +35,7 @@ interface EnvInfo {
     private balanceBeforeSell: number = 0;
     private readonly pctOfBalance: number = 0.1;
     private predictionDate: Date;
-    constructor(data: any[], initialBalance: number = 10000, startDate: string) {
+    constructor(data: TradingData[], initialBalance: number = 10000, startDate: string) {
       this.data = data;
       this.balance = initialBalance;
       this.predictionDate = new Date(startDate);
