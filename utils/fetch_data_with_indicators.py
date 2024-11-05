@@ -1,8 +1,10 @@
 from enum import Enum
+import numpy as np
 import yfinance as yf
 from typing import Union
 from pandas import DataFrame
 from ta.momentum import RSIIndicator
+from ta.trend import MACD, EMAIndicator
 from datetime import datetime
 
 class Api(Enum):
@@ -33,7 +35,7 @@ def fetch_data_with_indicators(
             Interval of the data (default is '1d')
         indicators : None | list[str]
             List of indicators to add to the data (default is None)
-            Supported indicators: 'RSI'
+            Supported indicators: 'RSI', 'MACD', 'EMA_{window}'
     
         Returns
         -------
@@ -84,14 +86,24 @@ def fetch_data_with_indicators(
     if indicators is None:
         return data
     
+    dropna_elements = []
+    
     indicators = [indicator.upper() for indicator in indicators]
     for indicator in indicators:
         if indicator == 'RSI':
             data = add_rsi(data)
+            dropna_elements.append('RSI')
+        elif indicator == 'MACD':
+            data = add_macd(data)
+            dropna_elements.extend(['MACD_LINE', 'MACD_SIGNAL', 'MACD_HIST'])
+        elif indicator.startswith('EMA'):
+            window = int(indicator.split('_')[1])
+            data = add_ema(data, window)
+            dropna_elements.append(f'EMA_{window}')
         else:
             raise ValueError(f"Invalid indicator: {indicator}")
     
-    data = data.dropna(subset=indicators)
+    data = data.dropna(subset=dropna_elements)
     
     return data
 
@@ -107,4 +119,20 @@ def _is_valid_date_format(date_str: str) -> bool:
 def add_rsi(data: DataFrame) -> DataFrame:
     """Add Relative Strength Index (RSI) to the data."""
     data['RSI'] = RSIIndicator(data['Close']).rsi()
+    
+    return data
+
+def add_macd(data: DataFrame) -> DataFrame:
+    """Add Moving Average Convergence Divergence (MACD) to the data."""
+    macd = MACD(data['Close'])
+    data['MACD_LINE'] = macd.macd()
+    data['MACD_SIGNAL'] = macd.macd_signal()
+    data['MACD_HIST'] = macd.macd_diff()
+
+    return data
+
+def add_ema(data: DataFrame, window: int) -> DataFrame:
+    """Add Exponential Moving Average (EMA) to the data."""
+    data[f'EMA_{window}'] = EMAIndicator(data['Close'], window=window).ema_indicator()
+    
     return data
