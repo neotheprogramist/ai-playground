@@ -15,6 +15,8 @@
     "@dfinity/agent": "^1.4.0",
     "@dfinity/candid": "^1.4.0",
     "@dfinity/principal": "^1.4.0",
+    "chart.js": "^4.4.6",
+    "svelte-chartjs": "^3.1.5",
     "yahoo-finance2": "^2.13.2"
   },
   "devDependencies": {
