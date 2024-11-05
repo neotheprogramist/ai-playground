@@ -2,9 +2,9 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
-class RsiCustomEnv(gym.Env):
+class RsiAndEmaCustomEnv(gym.Env):
     def __init__(self, data, action_space, observation_space, initial_balance=10000, transaction_cost=0.001):
-        super(RsiCustomEnv, self).__init__()
+        super(RsiAndEmaCustomEnv, self).__init__()
         self.cached_data = data.copy()
         self.data = data.copy().reset_index()
         self.actions_data = data.copy().reset_index()
@@ -45,7 +45,7 @@ class RsiCustomEnv(gym.Env):
         return (self._next_observation(), self._get_info())
 
     def _next_observation(self):
-        stock_data = self.data.iloc[self._current_step][['Open', 'High', 'Low', 'Close', 'Volume', 'RSI']].copy()
+        stock_data = self.data.iloc[self._current_step][['Open', 'High', 'Low', 'Close', 'Volume', 'RSI', 'EMA_20', 'EMA_50', 'EMA_100']].copy()
         stock_data['Balance'] = self._balance
         stock_data['Token_Amount'] = self._token_amount
         stock_data['Portfolio_Value'] = self._portfolio_value
