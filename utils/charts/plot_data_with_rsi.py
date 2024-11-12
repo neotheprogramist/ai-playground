@@ -16,7 +16,7 @@ def plot_data_with_rsi(data: pd.DataFrame):
     None
     """
     
-    buy_signals = data[data['Action'] == 0]
+    buy_signals = data[data['Action'] == 1]
     sell_signals = data[data['Action'] == 2]
     
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), gridspec_kw={'height_ratios': [3, 1]})
