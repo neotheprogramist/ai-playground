@@ -46,3 +46,6 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Editor backu
+
+tensorboard_logs/
+test_models/
