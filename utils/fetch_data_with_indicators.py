@@ -3,7 +3,7 @@ import numpy as np
 import yfinance as yf
 from typing import Union
 from pandas import DataFrame
-from ta.momentum import RSIIndicator
+from ta.momentum import RSIIndicator, ROCIndicator
 from ta.trend import MACD, EMAIndicator
 from datetime import datetime
 
@@ -100,6 +100,9 @@ def fetch_data_with_indicators(
             window = int(indicator.split('_')[1])
             data = add_ema(data, window)
             dropna_elements.append(f'EMA_{window}')
+        elif indicator == 'ROC':
+            data = add_roc(data)
+            dropna_elements.append('ROC')
         else:
             raise ValueError(f"Invalid indicator: {indicator}")
     
@@ -134,5 +137,11 @@ def add_macd(data: DataFrame) -> DataFrame:
 def add_ema(data: DataFrame, window: int) -> DataFrame:
     """Add Exponential Moving Average (EMA) to the data."""
     data[f'EMA_{window}'] = EMAIndicator(data['Close'], window=window).ema_indicator()
+    
+    return data
+
+def add_roc(data: DataFrame) -> DataFrame:
+    """Add Rate of Change (ROC) to the data."""
+    data['ROC'] = ROCIndicator(data['Close']).roc()
     
     return data
