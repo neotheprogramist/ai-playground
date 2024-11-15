@@ -49,3 +49,4 @@ $RECYCLE.BIN/
 
 tensorboard_logs/
 test_models/
+.venv/
