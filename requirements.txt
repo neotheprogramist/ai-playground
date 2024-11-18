@@ -14,3 +14,4 @@ ic-py==1.0.1
 onnx==1.17.0
 onnxruntime==1.20.0
 torch-onnx==0.1.25
+tensorboard==2.18.0
