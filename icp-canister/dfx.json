@@ -1,0 +1,30 @@
+{
+  "canisters": {
+    "host_ai_model_backend": {
+      "candid": "src/host_ai_model_backend/host_ai_model_backend.did",
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ],
+      "package": "host_ai_model_backend",
+      "type": "custom",
+      "build": [ "bash build.sh" ],
+      "wasm": "target/wasm32-wasi/release/host_ai_model_backend-ic.wasm"
+    },
+    "host_ai_model_frontend": {
+      "dependencies": ["host_ai_model_backend"],
+      "source": ["src/host_ai_model_frontend/dist"],
+      "type": "assets",
+      "workspace": "host_ai_model_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
