@@ -11,6 +11,9 @@ export default defineConfig({
   build: {
     emptyOutDir: true,
   },
+  test: {
+		include: ['src/**/*.{test,spec}.{js,ts}']
+	},
   optimizeDeps: {
     esbuildOptions: {
       define: {
@@ -43,4 +46,5 @@ export default defineConfig({
       },
     ],
   },
+
 });
