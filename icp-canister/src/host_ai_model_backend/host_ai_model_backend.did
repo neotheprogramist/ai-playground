@@ -1,0 +1,12 @@
+type Action = variant {
+    Hold;
+    Buy;
+    Sell;
+};
+
+service : {
+    "clear_model_bytes": () -> ();
+    "append_model_bytes": (vec nat8) -> ();
+    "setup_model": () -> (variant { Ok; Err: text; });
+    "get_action": (vec float32) -> (variant { Ok: Action; Err: text; });
+}
