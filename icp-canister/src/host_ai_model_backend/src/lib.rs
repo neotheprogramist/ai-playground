@@ -44,8 +44,9 @@ fn setup_model() -> Result<(), String> {
 }
 
 #[ic_cdk::update]
-fn get_action(input: Vec<f32>) -> Result<Action, String> {
-    onnx::get_action(input).map_err(|err| format!("Failed to get action: {}", err))
+fn get_action(input: Vec<f32>, portfolio: Vec<f32>) -> Result<Action, String> {
+    onnx::get_action(input, portfolio)
+        .map_err(|err| format!("Failed to get action: {}", err))
 }
 
 register_custom_getrandom!(get_random_bypass::always_fail);
