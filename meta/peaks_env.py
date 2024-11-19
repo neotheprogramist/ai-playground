@@ -48,6 +48,12 @@ class CryptoTradingEnv(gym.Env):
         self.price_history = deque(maxlen=self.window_size)
         self._seed()
 
+    def current_price(self):
+        return self.df.loc[self.current_step, "Close"]
+    
+    def current_step(self):
+        return self.current_step
+
     def _seed(self, seed=None):
         np.random.seed(seed)
 
