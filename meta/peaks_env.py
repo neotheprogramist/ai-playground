@@ -53,6 +53,9 @@ class CryptoTradingEnv(gym.Env):
     
     def current_step(self):
         return self.current_step
+    
+    def current_rsi(self):
+        return self.df.loc[self.current_step, "RSI"]
 
     def _seed(self, seed=None):
         np.random.seed(seed)
