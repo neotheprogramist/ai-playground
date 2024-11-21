@@ -1,5 +1,5 @@
 # simulations/BuySellSimulation.py
-class BuySellStrategy:
+class BuySellInParts:
     def __init__(self, initial_balance, risk_level='medium', sell_all_threshold=0.001):
         self.initial_balance = initial_balance
         self.balance = initial_balance
@@ -16,7 +16,6 @@ class BuySellStrategy:
         self._update_transaction_history(trade_amount=0.0, trade_price=0.0)
         
     def _update_transaction_history(self, trade_amount=0.0, trade_price=0.0, traded_crypto=0.0):
-        """Update transaction history with current portfolio state and trade details"""
         self.transaction_history.append({
             'balance': self.balance,
             'crypto_held': self.crypto_held,
@@ -26,8 +25,7 @@ class BuySellStrategy:
             'timestamp': len(self.transaction_history)
         })
         
-    def interpret_action(self, action, current_price):
-        """Convert raw model action into practical trading decision"""
+    def interpret_action(self, action, current_price, current_step):
         trade_amount = 0.0
         traded_crypto = 0.0
         

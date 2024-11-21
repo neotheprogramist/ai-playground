@@ -1,9 +1,9 @@
 from collections import deque
 from datetime import datetime
 
-class DCAStrategyAveraging:
+class DCAStrategy:
     def __init__(self, initial_balance, risk_level='medium', alpha=0.1, window_size=10,
-                 dca_portions=4, min_interval=12):
+                 dca_portions=4, min_interval=8):
         self.initial_balance = initial_balance
         self.balance = initial_balance
         self.crypto_held = 0

@@ -1,7 +1,7 @@
 from collections import deque
 from datetime import datetime
 
-class BuySellStrategy:
+class BuySellWithEma:
     def __init__(self, initial_balance, risk_level='medium', sell_all_threshold=0.001, alpha=0.1, window_size=10):
         self.initial_balance = initial_balance
         self.balance = initial_balance
@@ -38,7 +38,7 @@ class BuySellStrategy:
             normalized_weights = [w / weights_sum for w in weights]
             self.ema_price = sum(p * w for p, w in zip(self.price_window, normalized_weights))
 
-    def interpret_action(self, action, current_price, current_rsi=None):
+    def interpret_action(self, action, current_price, current_step):
         trade_amount = 0.0
         traded_crypto = 0.0
         
