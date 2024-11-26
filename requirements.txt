@@ -3,7 +3,7 @@ gymnasium==0.29.1
 jupyter_client==8.6.2
 jupyter_core==5.7.2
 matplotlib==3.9.2
-numpy==2.1.2
+numpy
 pandas==2.2.2
 QuantStats==0.0.64
 stable_baselines3==2.3.2
@@ -19,3 +19,9 @@ ipython==8.29.0
 plotly==5.24.1
 nbformat==5.10.4
 tensorflow==2.18.0
+Flask 
+Flask-RESTful 
+redis 
+python-dotenv
+pydantic
+cloudpickle
