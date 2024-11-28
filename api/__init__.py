@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
 from .db import db, migrate
-from .config import Config
+from .config.config import Config
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -11,11 +11,13 @@ def create_app(config_class=Config):
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
+    
+    # Configure CORS
     CORS(
         app,
-        resources={r"/*": {"origins": "*"}},
-        allow_headers=["Content-Type", "X-Session-Token"],
-        methods=["GET", "POST", "OPTIONS"],
+        resources={r"/*": {"origins": app.config['CORS_ORIGINS']}},
+        allow_headers=app.config['CORS_HEADERS'],
+        methods=app.config['CORS_METHODS'],
     )
 
     # Initialize API

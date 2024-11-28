@@ -9,6 +9,15 @@ environment.
 - Docker and Docker Compose
 - pip (Python package installer)
 
+## Environment Setup
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Update the `.env` file with your specific configuration values
+
 ## Setup Instructions
 
 1. **Create and activate a virtual environment**:
