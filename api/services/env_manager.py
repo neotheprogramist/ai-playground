@@ -1,21 +1,19 @@
-import pickle
+import redis
 import threading
 import cloudpickle
 import uuid
 from datetime import datetime, timedelta
 from typing import Tuple
-import redis
-
-from api.utils import flatten_observation
 from utils.fetch_data_with_indicators import fetch_data_with_indicators, Api
 from meta.peaks_env import CryptoTradingEnv
-from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
+from stable_baselines3.common.vec_env import VecNormalize
 from scipy.signal import find_peaks
-from api.env_wrapper import PickleableEnvWrapper
+
+from ..utils import flatten_observation
+from ..env_wrapper import PickleableEnvWrapper
 
 redis_client = redis.Redis(host="localhost", port=6380, db=0, decode_responses=False)
 env_lock = threading.Lock()
-
 
 class EnvManager:
     def __init__(self):
@@ -190,3 +188,4 @@ class EnvManager:
             return "updated"
 
         return "no update needed"
+
