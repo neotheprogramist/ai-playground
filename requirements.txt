@@ -25,3 +25,6 @@ redis
 python-dotenv
 pydantic
 cloudpickle
+Flask-Migrate
+Flask-SQLAlchemy
+psycopg2-binary
