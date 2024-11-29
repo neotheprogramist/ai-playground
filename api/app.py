@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     logger.info("Starting API")
+  
     app.run(
         host=Config.API_HOST,
         port=Config.API_PORT,

@@ -88,18 +88,16 @@ class GetActions(Resource):
         if env_result:
             logger.info("Using existing environment")
             global_env_manager_instance.update_env_data(
-                request.pair, request.interval
+                request.pair, request.interval, request.end
             )
             
             env_data, norm_env = global_env_manager_instance.get_env(
                 request.pair, request.interval
             )
 
-            is_done = False
-            
+            is_done = norm_env.envs[0].is_done()
             observation = norm_env.envs[0]._get_observation()    
-            print(norm_env.envs[0].df.shape, norm_env.envs[0].current_step)
-            
+         
             while not is_done:
                 action = icp_predictor_instance.predict(observation)
                 observation, reward, done, info = norm_env.step([action])
@@ -139,7 +137,7 @@ class GetActions(Resource):
             )
             
             observation = norm_env.reset()
-            is_done = False
+            is_done = norm_env.envs[0].is_done()
  
             while not is_done:
                 action = icp_predictor_instance.predict(observation)
