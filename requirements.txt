@@ -28,3 +28,4 @@ cloudpickle
 Flask-Migrate
 Flask-SQLAlchemy
 psycopg2-binary
+flask-cors

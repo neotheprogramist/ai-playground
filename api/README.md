@@ -1,7 +1,6 @@
-# RL service 
+# RL Service API
 
-This service provides a Flask API with PostgreSQL database backend, allowing to provide actions for some time range using some default RL
-environment.
+A Flask API service with PostgreSQL backend for providing RL environment actions over specified time ranges.
 
 ## Prerequisites
 
@@ -9,79 +8,88 @@ environment.
 - Docker and Docker Compose
 - pip (Python package installer)
 
-## Environment Setup
+## Quick Start
 
-1. Copy the example environment file:
+1. **Environment Setup**
    ```bash
+   # Copy and configure environment variables
    cp .env.example .env
    ```
 
-2. Update the `.env` file with your specific configuration values
-
-## Setup Instructions
-
-1. **Create and activate a virtual environment**:
+2. **Virtual Environment**
    ```bash
    python -m venv venv
-   source venv/bin/activate
-   ```
-
-2. **Install dependencies**:
-   ```bash
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    pip install -r requirements.txt
    ```
 
-3. **Start PostgreSQL using Docker**:
+3. **Database Setup**
    ```bash
+   # Start PostgreSQL and PgAdmin
    docker-compose up -d
-   ```
-   This will start:
-   - PostgreSQL on port 5432
-   - PgAdmin on port 8080 (accessible at http://localhost:8080)
 
-4. **Database migrations**:
-   ```bash
+   # Initialize database schema
+   flask db init
    flask db upgrade
    ```
-   This will create all necessary database tables.
 
-5. **Run the Flask application**:
+4. **Run the API**
    ```bash
    flask run
    ```
-   The API will be available at http://localhost:5000
+   Access the API at http://localhost:5000
 
-## Database access
+## Database Configuration
 
-### PostgreSQL default connection details
+### PostgreSQL
 - Host: localhost
 - Port: 5432
 - Database: docker
 - Username: docker
 - Password: docker
 
-### PgAdmin default access
+### PgAdmin
 - URL: http://localhost:8080
 - Email: admin@example.com
 - Password: admin
 
-## Development
+## Database Management
 
-### Creating new migrations
+### Creating Migrations
+```bash
+# Generate migration after model changes
+flask db migrate -m "description"
 
-When you make changes to database models, create a new migration:
-  ```bash
-  flask db migrate -m "description"
+# Apply the migration
+flask db upgrade
+```
 
-  flask db upgrade
-  ```
+### Rollback Changes
+```bash
+flask db downgrade
+```
 
-### Rolling back migrations
+## Troubleshooting
 
-To undo the last migration:
-  ```bash
-  flask db downgrade
-  ```
+1. **Database Connection Issues**
+   - Ensure Docker containers are running: `docker ps`
+   - Check PostgreSQL logs: `docker logs <postgres-container-id>`
+   - Verify `.env` database credentials match Docker Compose settings
+
+2. **Migration Issues**
+   - If `flask db upgrade` fails, ensure you've run `flask db init` first
+   - Check if migrations directory exists
+   - Verify database connection settings
+
+3. **Connecting with Pgadmin**
+   - Ensure the host is called the same as container defined inside compose configuration, this will be **postgres** for current configuration
+
+## Development Notes
+
+- The API runs in debug mode by default for development
+- Use PgAdmin for database inspection and manual queries
+- Always run migrations after pulling new changes
+- Keep your virtual environment activated while working
 
 
 

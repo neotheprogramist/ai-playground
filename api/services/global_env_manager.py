@@ -12,13 +12,11 @@ from meta.peaks_env import CryptoTradingEnv
 
 
 class GlobalEnvManager:
-    def _validate_and_adjust_dates(
+    def _validate_and_adjust_start_end(
         self, start: str, end: str, interval: str
     ) -> Tuple[str, str]:
         start_date = datetime.strptime(start, "%Y-%m-%d")
         end_date = datetime.strptime(end, "%Y-%m-%d")
-        current_date = datetime.now()
-
         lookback_period = 60
         if interval == "1d":
             start_adjusted = start_date - timedelta(days=lookback_period)
@@ -27,15 +25,16 @@ class GlobalEnvManager:
         elif interval == "1m":
             start_adjusted = start_date - timedelta(minutes=lookback_period)
 
-        if end_date > current_date:
-            end_date = current_date
+        if end_date > datetime.now():
+            end_date = datetime.now()
 
         return start_adjusted.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")
 
     def _fetch_data(self, pair, interval, start, end):
-        adjusted_start, adjusted_end = self._validate_and_adjust_dates(
+        adjusted_start, adjusted_end = self._validate_and_adjust_start_end(
             start, end, interval
         )
+
         data = fetch_data_with_indicators(
             api=Api.YAHOO,
             stock_symbol=pair,
@@ -51,12 +50,19 @@ class GlobalEnvManager:
         peaks, _ = find_peaks(data["Close"], height=100, prominence=5, distance=40)
         data["Peak"] = 0
         data.loc[data.index[peaks], "Peak"] = 1
-        return data, adjusted_start, adjusted_end
+
+        end = datetime.strptime(adjusted_end, "%Y-%m-%d")
+
+        if not data.empty:
+            end = data.index[-1].date()
+
+        return data, adjusted_start, end.strftime("%Y-%m-%d")
 
     def create_env(self, pair, interval, initial_balance, start, end):
         data, adjusted_start, adjusted_end = self._fetch_data(
             pair, interval, start, end
         )
+
         env_original = CryptoTradingEnv(data, initial_balance=initial_balance)
         env_pickleable = PickleableEnvWrapper(env_original)
         norm_env = VecNormalize(env_pickleable, norm_obs=True, norm_reward=False)
@@ -112,28 +118,23 @@ class GlobalEnvManager:
             db.session.rollback()
             raise
 
-    def update_env_data(self, pair, interval, new_end):
+    def update_env_data(self, pair, interval):
         env_data, norm_env = self.get_env(pair, interval)
 
-        new_end = datetime.strptime(new_end, "%Y-%m-%d")
         adjusted_end = datetime.strptime(env_data["adjusted_end"], "%Y-%m-%d")
-        now = datetime.now()
-
-        if new_end <= adjusted_end:
-            return
-        elif new_end > adjusted_end and new_end <= now:
-            adjusted_end = new_end
-        else:
-            adjusted_end = now
+        last_date = adjusted_end
 
         new_data = fetch_data_with_indicators(
             api=Api.YAHOO,
             stock_symbol=env_data["pair"],
             start=env_data["adjusted_start"],
-            end=adjusted_end.strftime("%Y-%m-%d"),
+            end=datetime.now().strftime("%Y-%m-%d"),
             interval=env_data["interval"],
             indicators=env_data["indicators"],
         )
+
+        if not new_data.empty:
+            last_date = new_data.index[-1].date()
 
         new_data = new_data.copy()
         new_data["Pct Change"] = new_data["Close"].pct_change() * 100
@@ -143,8 +144,7 @@ class GlobalEnvManager:
         new_data.loc[new_data.index[peaks], "Peak"] = 1
 
         env_data["env"].envs[0].refresh_data(new_data)
-        env_data["adjusted_end"] = adjusted_end.strftime("%Y-%m-%d")
+        env_data["adjusted_end"] = last_date.strftime("%Y-%m-%d")
         self.save_env(
             env_data["pair"], env_data["interval"], cloudpickle.dumps(env_data)
         )
-    

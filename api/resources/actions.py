@@ -12,6 +12,7 @@ import cloudpickle
 
 logger = logging.getLogger(__name__)
 
+
 class GetActions(Resource):
     ALLOWED_ACTIONS_INTERVALS = ["1d"]
     SUPPORTED_PAIRS = ["BTC-USD"]
@@ -55,19 +56,15 @@ class GetActions(Resource):
             logger.info(f"Found {len(actions)} existing actions")
             last_action_date = max(action.timestamp for action in actions)
             first_action_date = min(action.timestamp for action in actions)
-            logger.info(
-                f"Actions date range: {first_action_date} - {last_action_date}"
-            )
-            
-            if start_date < first_action_date:
-                logger.info(f"Requested start date is before the first action date, setting start date to first action date")
-                request.start = first_action_date.strftime("%Y-%m-%d")
+            logger.info(f"Actions date range: {first_action_date} - {last_action_date}")
 
             if end_date > last_action_date and end_date <= datetime.now():
                 logger.info(
                     "Requested date range outside existing actions, generating new actions"
                 )
                 actions = self._generate_new_actions(request)
+
+            return actions
         elif are_dates_valid(request.start, request.end):
             logger.info("No existing actions found, generating new ones")
             actions = self._generate_new_actions(request)
@@ -80,24 +77,22 @@ class GetActions(Resource):
         logger.info(
             f"Generating new actions for {request.pair} with interval {request.interval}"
         )
-        
+
         env_result = global_env_manager_instance.get_env(request.pair, request.interval)
-      
+
         to_store = []
 
         if env_result:
             logger.info("Using existing environment")
-            global_env_manager_instance.update_env_data(
-                request.pair, request.interval, request.end
-            )
-            
+            global_env_manager_instance.update_env_data(request.pair, request.interval)
+
             env_data, norm_env = global_env_manager_instance.get_env(
                 request.pair, request.interval
             )
 
             is_done = norm_env.envs[0].is_done()
-            observation = norm_env.envs[0]._get_observation()    
-         
+            observation = norm_env.envs[0]._get_observation()
+
             while not is_done:
                 action = icp_predictor_instance.predict(observation)
                 observation, reward, done, info = norm_env.step([action])
@@ -105,7 +100,7 @@ class GetActions(Resource):
                 logger.info(
                     f"Step result - Action: {action}, Reward: {reward[0]}, Done: {is_done}"
                 )
-                
+
                 norm_env.render()
 
                 flattened_observation = flatten_observation(observation)
@@ -135,10 +130,10 @@ class GetActions(Resource):
             env_data, norm_env = global_env_manager_instance.get_env(
                 request.pair, request.interval
             )
-            
+
             observation = norm_env.reset()
             is_done = norm_env.envs[0].is_done()
- 
+
             while not is_done:
                 action = icp_predictor_instance.predict(observation)
                 observation, reward, done, info = norm_env.step([action])
@@ -147,12 +142,12 @@ class GetActions(Resource):
                 logger.info(
                     f"Step result - Action: {action}, Reward: {reward[0]}, Done: {is_done}"
                 )
-                
+
                 norm_env.render()
 
                 flattened_observation = flatten_observation(observation)
                 date = info[0]["date"].to_pydatetime()
-                
+
                 to_store.append(
                     {
                         "action": action,
@@ -162,18 +157,17 @@ class GetActions(Resource):
                         "interval": request.interval,
                     }
                 )
-            
-    
+
         logger.info(f"Storing {len(to_store)} new actions in database")
         store_actions_in_db(to_store, request.pair)
-        
+
         env_data["vec_normalize"] = norm_env
         env_data["env"] = norm_env.venv
         env_data_serialized = cloudpickle.dumps(env_data)
         global_env_manager_instance.save_env(
             request.pair, request.interval, env_data_serialized
         )
-        
+
         return get_actions_between_dates(**request.model_dump())
 
     def _format_actions(self, actions):

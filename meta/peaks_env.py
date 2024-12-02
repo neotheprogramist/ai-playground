@@ -36,9 +36,11 @@ class CryptoTradingEnv(gym.Env):
         # Update the class attribute
         self.actions_history = actions_history
         logging.debug("Updated self.actions_history successfully.")
+        
+        
     
     def is_done(self):
-        return self.current_step >= len(self.df) - 1
+        return self.current_step >= len(self.df) 
     
     def __init__(self, df, window_size=10, initial_balance=1000, render_mode="human", num_features=5):
         super(CryptoTradingEnv, self).__init__()
