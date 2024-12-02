@@ -10,18 +10,16 @@ A Flask API service with PostgreSQL backend for providing RL environment actions
 
 ## Quick Start
 
-1. **Environment Setup**
+1. **Python virtual environment setup**
+Navigate back to root folder, read readme and do as it says
+
+2. **Environment variables setup**
    ```bash
    # Copy and configure environment variables
    cp .env.example .env
    ```
 
-2. **Virtual Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+   Ensure mainnet is chosen in .env, if not you have to deploy the model manually and upload it.
 
 3. **Database Setup**
    ```bash
@@ -53,7 +51,7 @@ A Flask API service with PostgreSQL backend for providing RL environment actions
 - Email: admin@example.com
 - Password: admin
 
-## Database Management
+## Database Management (not essential until developing)
 
 ### Creating Migrations
 ```bash

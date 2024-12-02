@@ -11,7 +11,13 @@ This project consists of two main components:
 pip install -e .
 ```
 
-2. **Install dependencies**
+2. **Virtual Environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
